@@ -1,7 +1,3 @@
-# UNIX-EEOB-546-Assignment
-This is for my assignment
-
-
 UNIX Assignment
 Data inspection
 Attributes of fang_et_al_genotypes.txt data
@@ -37,3 +33,126 @@ By inspecting this file I learned that:
 
 
 Data processing
+
+Processed the snp_position.txt and created a new file for the headers. Created another file with no headers before sorting and echoeing this file. This was successfully sorted with "0" as a confirmation
+ cut -f 1,3,4 snp_position.txt > snp_three.txt
+$ head -n 1 snp_three.txt > headers_snp.txt      
+$ tail -n +2 snp_three.txt > noheaders_snp.txt   
+$ sort -k1,1 noheaders_snp.txt > sort_noheaders_snp.txt
+$ sort -k1,1 -c sort_noheaders_snp.txt
+$ echo $?
+0
+
+Processed the fang_et_al_genotypes.txt and created a new file for the headers. Next, I created new files for group of maize and teosinte from the fang_et_al_genotypes.txt file.
+$ head -n 1 fang_et_al_genotypes.txt > headers_fang.txt
+$ grep -E "(ZMMLR|ZMMIL|ZMMMR)" fang_et_al_genotypes.txt > maizegrp.txt
+$ grep -E "(ZMPBA|ZMPIL|ZMPJA)" fang_et_al_genotypes.txt > teosintegrp.txt
+
+For Maize
+I created headers for the maize group and transposed it. I also created a transpose file with no headers before sorting and merging with the snp_position.txt file. To confirm that the sorting and merging was successful, "0" echo indicated that the sorting was successful while "wc -l" command was used to check the number of lines {984} which is the same number as snp_position.txt file
+$ cat headers_fang.txt maizegrp.txt > headers_maize.txt
+$ awk -f transpose.awk headers_maize.txt > transpose_maize.txt
+$ tail -n +3 transpose_maize.txt > nohead_transpose_maize.txt
+$ sort -k1,1 nohead_transpose_maize.txt > sort_nohead_maize.txt
+$ sort -k1,1 -c sort_nohead_maize.txt
+$ echo $?
+0
+$ wc -l sort_nohead_maize.txt
+984 sort_nohead_maize.txt
+
+The snp-file was merged with the maize file using the "join" command. The first-four columns was cut to confirm that the joint file is having SNP_ID, Chromosome and position in the first, second and third columns respectively. New file was created with headers attached to the joined files.  
+$ join -1 1 -2 1 -t $'\t' sort_noheaders_snp.txt sort_nohead_maize.txt > merged_maize.txt
+$ cut -f1,2,3,4 merged_maize.txt | head -n 4
+$ cat headers_snp.txt merged_maize.txt > H_merged_maize.txt
+
+20 files in total for maize:(10 files with SNPs ordered based on decreasing position.increasing and 10 files with SNPs ordered based on decreasing position)
+1 file with all SNPs with multiple positions in the genome
+1 file with all SNPs with unknown positions in the genome
+
+SNPs ordered based on increasing position values using the "bioawk" command with the "-c hdr" to identify column named "Chromosome",
+$ module load bioawk
+$ bioawk -c hdr '$Chromosome == "1" {print $0}' H_merged_maize.txt | sort -t $'\t' -k3,3n > chr1m.txt
+$ bioawk -c hdr '$Chromosome == "2" {print $0}' H_merged_maize.txt | sort -t $'\t' -k3,3n > chr2m.txt
+$ bioawk -c hdr '$Chromosome == "3" {print $0}' H_merged_maize.txt | sort -t $'\t' -k3,3n > chr3m.txt
+$ bioawk -c hdr '$Chromosome == "4" {print $0}' H_merged_maize.txt | sort -t $'\t' -k3,3n > chr4m.txt
+$ bioawk -c hdr '$Chromosome == "5" {print $0}' H_merged_maize.txt | sort -t $'\t' -k3,3n > chr5m.txt
+$ bioawk -c hdr '$Chromosome == "6" {print $0}' H_merged_maize.txt | sort -t $'\t' -k3,3n > chr6m.txt
+$ bioawk -c hdr '$Chromosome == "7" {print $0}' H_merged_maize.txt | sort -t $'\t' -k3,3n > chr7m.txt
+$ bioawk -c hdr '$Chromosome == "8" {print $0}' H_merged_maize.txt | sort -t $'\t' -k3,3n > chr8m.txt
+$ bioawk -c hdr '$Chromosome == "9" {print $0}' H_merged_maize.txt | sort -t $'\t' -k3,3n > chr9m.txt
+$ bioawk -c hdr '$Chromosome == "10" {print $0}' H_merged_maize.txt | sort -t $'\t' -k3,3n > chr10m.txt
+
+SNPs ordered based on decreasing position values using the "bioawk" command and sorted in the reversed order using "rn" command. Next I piped the results of "sort" to "sed" to identify and replace the "?", which represents missing values in the original files, with "-"
+$ bioawk -c hdr '$Chromosome == "1" {print $0}' H_merged_maize.txt | sort -t $'\t' -k3,3rn | sed 's/?/-/g' > chr1am.txt
+$ bioawk -c hdr '$Chromosome == "2" {print $0}' H_merged_maize.txt | sort -t $'\t' -k3,3rn | sed 's/?/-/g' > chr2am.txt
+$ bioawk -c hdr '$Chromosome == "3" {print $0}' H_merged_maize.txt | sort -t $'\t' -k3,3rn | sed 's/?/-/g' > chr3am.txt
+$ bioawk -c hdr '$Chromosome == "4" {print $0}' H_merged_maize.txt | sort -t $'\t' -k3,3rn | sed 's/?/-/g' > chr4am.txt
+$ bioawk -c hdr '$Chromosome == "5" {print $0}' H_merged_maize.txt | sort -t $'\t' -k3,3rn | sed 's/?/-/g' > chr5am.txt
+$ bioawk -c hdr '$Chromosome == "6" {print $0}' H_merged_maize.txt | sort -t $'\t' -k3,3rn | sed 's/?/-/g' > chr6am.txt
+$ bioawk -c hdr '$Chromosome == "7" {print $0}' H_merged_maize.txt | sort -t $'\t' -k3,3rn | sed 's/?/-/g' > chr7am.txt
+$ bioawk -c hdr '$Chromosome == "8" {print $0}' H_merged_maize.txt | sort -t $'\t' -k3,3rn | sed 's/?/-/g' > chr8am.txt
+$ bioawk -c hdr '$Chromosome == "9" {print $0}' H_merged_maize.txt | sort -t $'\t' -k3,3rn | sed 's/?/-/g' > chr9am.txt
+$ bioawk -c hdr '$Chromosome == "10" {print $0}' H_merged_maize.txt | sort -t $'\t' -k3,3rn | sed 's/?/-/g' > chr10am.txt
+
+SNPS with multiple positions in the genome was identified with "awk"' command, while the "cut" command was use to access the first-five columns with the first 5 rows using "head" and the last 5 rows for "tail"
+$ awk -F "\t" '$3 ~ /multiple/'  H_merged_maize.txt > multiple_maize.txt
+$ cut -f1,2,3,4,5 multiple_maize.txt | head -n 5
+$ cut -f1,2,3,4,5 multiple_maize.txt | tail -n 5
+
+SNPS with unknown positions in the genome was identified with "awk"' command, while the "cut" command was use to access the first-five columns with the first 5 rows using "head" and the last 5 rows for "tail"
+$ awk -F "\t" '$3 ~ /unknown/'  H_merged_maize.txt > unknown_maize.txt
+$ cut -f1,2,3,4,5 unknown_maize.txt | head -n 5
+$ cut -f1,2,3,4,5 unknown_maize.txt | tail -n 5
+
+
+For Teosinte
+
+$ cat headers_fang.txt teosintegrp.txt > headers_teosinte.txt
+$ awk -f transpose.awk headers_teosinte.txt > transpose_teosinte.txt
+$ tail -n +3 transpose_teosinte.txt > nohead_transpose_teosinte.txt
+$ sort -k1,1 nohead_transpose_teosinte.txt > sort_nohead_teosinte.txt
+$ sort -k1,1 -c sort_nohead_teosinte.txt
+$ echo $?
+0
+$ wc -l sort_nohead_teosinte.txt
+984 sort_nohead_teosinte.txt
+
+$ join -1 1 -2 1 -t $'\t' sort_noheaders_snp.txt sort_nohead_teosinte.txt > merged_teosinte.txt
+$ cut -f1,2,3,4 merged_teosinte.txt | head -n 4
+$ cat headers_snp.txt merged_teosinte.txt > H_merged_teosinte.txt
+
+
+10 files with SNPs ordered based on increasing position values using the "bioawk" command with the "-c hdr" to identify column named "Chromosome",
+$ module load bioawk
+$ bioawk -c hdr '$Chromosome == "1" {print $0}' H_merged_teosinte.txt | sort -t $'\t' -k3,3n > chr1t.txt
+$ bioawk -c hdr '$Chromosome == "2" {print $0}' H_merged_teosinte.txt | sort -t $'\t' -k3,3n > chr2t.txt
+$ bioawk -c hdr '$Chromosome == "3" {print $0}' H_merged_teosinte.txt | sort -t $'\t' -k3,3n > chr3t.txt
+$ bioawk -c hdr '$Chromosome == "4" {print $0}' H_merged_teosinte.txt | sort -t $'\t' -k3,3n > chr4t.txt
+$ bioawk -c hdr '$Chromosome == "5" {print $0}' H_merged_teosinte.txt | sort -t $'\t' -k3,3n > chr5t.txt
+$ bioawk -c hdr '$Chromosome == "6" {print $0}' H_merged_teosinte.txt | sort -t $'\t' -k3,3n > chr6t.txt
+$ bioawk -c hdr '$Chromosome == "7" {print $0}' H_merged_teosinte.txt | sort -t $'\t' -k3,3n > chr7t.txt
+$ bioawk -c hdr '$Chromosome == "8" {print $0}' H_merged_teosinte.txt | sort -t $'\t' -k3,3n > chr8t.txt
+$ bioawk -c hdr '$Chromosome == "9" {print $0}' H_merged_teosinte.txt | sort -t $'\t' -k3,3n > chr9t.txt
+$ bioawk -c hdr '$Chromosome == "10" {print $0}' H_merged_teosinte.txt | sort -t $'\t' -k3,3n > chr10t.txt
+
+10 files with SNPs ordered based on decreasing position values using the "bioawk" command and sorted in the reversed order using "rn" command. 
+$ bioawk -c hdr '$Chromosome == "1" {print $0}' H_merged_teosinte.txt | sort -t $'\t' -k3,3rn | sed 's/?/-/g' > chr1at.txt
+$ bioawk -c hdr '$Chromosome == "2" {print $0}' H_merged_teosinte.txt | sort -t $'\t' -k3,3rn | sed 's/?/-/g' > chr2at.txt
+$ bioawk -c hdr '$Chromosome == "3" {print $0}' H_merged_teosinte.txt | sort -t $'\t' -k3,3rn | sed 's/?/-/g' > chr3at.txt
+$ bioawk -c hdr '$Chromosome == "4" {print $0}' H_merged_teosinte.txt | sort -t $'\t' -k3,3rn | sed 's/?/-/g' > chr4at.txt
+$ bioawk -c hdr '$Chromosome == "5" {print $0}' H_merged_teosinte.txt | sort -t $'\t' -k3,3rn | sed 's/?/-/g' > chr5at.txt
+$ bioawk -c hdr '$Chromosome == "6" {print $0}' H_merged_teosinte.txt | sort -t $'\t' -k3,3rn | sed 's/?/-/g' > chr6at.txt
+$ bioawk -c hdr '$Chromosome == "7" {print $0}' H_merged_teosinte.txt | sort -t $'\t' -k3,3rn | sed 's/?/-/g' > chr7at.txt
+$ bioawk -c hdr '$Chromosome == "8" {print $0}' H_merged_teosinte.txt | sort -t $'\t' -k3,3rn | sed 's/?/-/g' > chr8at.txt
+$ bioawk -c hdr '$Chromosome == "9" {print $0}' H_merged_teosinte.txt | sort -t $'\t' -k3,3rn | sed 's/?/-/g' > chr9at.txt
+$ bioawk -c hdr '$Chromosome == "10" {print $0}' H_merged_teosinte.txt | sort -t $'\t' -k3,3rn | sed 's/?/-/g' > chr10at.txt
+
+SNPS with multiple positions in the genome in teosinte
+$ awk -F "\t" '$3 ~ /multiple/'  H_merged_teosinte.txt > multiple_teosinte.txt
+$ cut -f1,2,3,4,5 multiple_teosinte.txt | head -n 5
+$ cut -f1,2,3,4,5 multiple_teosinte.txt | tail -n 5
+
+SNPS with unknown positions in the genome in teosinte
+$ awk -F "\t" '$3 ~ /unknown/'  H_merged_teosinte.txt > unknown_teosinte.txt
+$ cut -f1,2,3,4,5 unknown_teosinte.txt | head -n 5
+$ cut -f1,2,3,4,5 unknown_teosinte.txt | tail -n 
